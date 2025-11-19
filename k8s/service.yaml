@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: springboot-service
+spec:
+  selector:
+    # Phải khớp với label trong deployment.yaml
+    app: springboot-app
+  ports:
+    - protocol: TCP
+      port: 80          # Port user truy cập (HTTP)
+      targetPort: 8080  # Port của container Spring Boot
+  type: LoadBalancer    # Tạo Public IP trên Cloud

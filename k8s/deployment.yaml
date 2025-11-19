@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: springboot-k8s-demo
+  labels:
+    app: springboot-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: springboot-app
+  template:
+    metadata:
+      labels:
+        app: springboot-app
+    spec:
+      containers:
+        - name: springboot-container
+          # LƯU Ý: Thay đổi dòng dưới đây thành Image của bạn trên Docker Hub/ECR
+          image: your-dockerhub-username/springboot-k8s-demo:v1
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+
+          # Cấu hình Resource để HPA tính toán Autoscaling
+          resources:
+            requests:
+              cpu: "200m"    # 0.2 CPU
+              memory: "256Mi"
+            limits:
+              cpu: "500m"    # 0.5 CPU (Giới hạn thấp để dễ test stress)
+              memory: "512Mi"
+
+          # Liveness Probe: K8s check xem App còn sống không (để restart nếu chết)
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+
+          # Readiness Probe: K8s check xem App sẵn sàng nhận request chưa
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 5
